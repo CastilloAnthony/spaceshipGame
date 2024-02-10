@@ -1,7 +1,7 @@
 from math import fabs, cos, radians
 
 class Ship():
-    def __init__(self, name:str=None, stats=None, pos=None):
+    def __init__(self, name:str=None, stats=None, pos=None, maxDims:dict=None):
         self.__stats = {
                 'Name':'Unnamed', 
                 'Type':'Viper', 
@@ -15,7 +15,7 @@ class Ship():
                 'Shield Recharge Rate':5,
                 'Sheild Recharge Delay':5,
                 'Rotation Speed':10,
-                'Max Speed':5, 
+                'Max Speed':100, 
                 'Speed':0.0,
                 'Max Acceleration':1,
                 'Acceleration Rampup':0.1, 
@@ -31,12 +31,20 @@ class Ship():
             'y_dir':0,
             'z_dir':0,
         }
+        self.__maxDims = {
+            'x':800,
+            'y':600,
+            'z':800,
+        }
         if stats != None:
             self.__stats.update(stats)
         if pos != None:
             self.__pos.update(pos)
+        if maxDims != None:
+            self.__maxDims.update(maxDims)
         if name != None:
             self.__stats['Name'] = name
+        
         self.__target = None
         self.__currentTarget = 0
         self.__validTargets = []
@@ -169,7 +177,31 @@ class Ship():
         # Speed
         if fabs(self.__stats['Speed']) > 0.0:
             self.__pos['x'] += self.__stats['Speed']*cos(radians(self.__pos['x_dir']))*timedelta
+            if self.__pos['x'] > self.__maxDims['x']:
+                self.__pos['x'] = self.__pos['x']-self.__maxDims['x']
+                # self.__pos['y'] = self.__pos['y']-self.__maxDims['y']
+                # self.__pos['z'] = self.__pos['z']-self.__maxDims['z']
+            elif self.__pos['x'] < 0:
+                self.__pos['x'] = self.__pos['x']+self.__maxDims['x']
+                # self.__pos['y'] = self.__pos['y']+self.__maxDims['y']
+                # self.__pos['z'] = self.__pos['z']+self.__maxDims['z']
             self.__pos['y'] += self.__stats['Speed']*cos(radians(self.__pos['y_dir']))*timedelta
+            if self.__pos['y'] > self.__maxDims['y']:
+                # self.__pos['x'] = self.__pos['x']-self.__maxDims['x']
+                self.__pos['y'] = self.__pos['y']-self.__maxDims['y']
+                # self.__pos['z'] = self.__pos['z']-self.__maxDims['z']
+            if self.__pos['y'] < 0:
+                # self.__pos['x'] = self.__pos['x']+self.__maxDims['x']
+                self.__pos['y'] = self.__pos['y']+self.__maxDims['y']
+                # self.__pos['z'] = self.__pos['z']+self.__maxDims['z']
             self.__pos['z'] += self.__stats['Speed']*cos(radians(self.__pos['z_dir']))*timedelta
+            if self.__pos['z'] > self.__maxDims['z']:
+                # self.__pos['x'] = self.__pos['x']-self.__maxDims['x']
+                # self.__pos['y'] = self.__pos['y']-self.__maxDims['y']
+                self.__pos['z'] = self.__pos['z']-self.__maxDims['z']
+            elif self.__pos['z'] < 0:
+                # self.__pos['x'] = self.__pos['x']+self.__maxDims['x']
+                # self.__pos['y'] = self.__pos['y']+self.__maxDims['y']
+                self.__pos['z'] = self.__pos['z']+self.__maxDims['z']
         # elif self.__stats['Speed']+self.__stats['Acceleration'] > self.__stats['Max Speed']:
 # end Ship

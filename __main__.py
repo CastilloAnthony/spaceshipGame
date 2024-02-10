@@ -13,15 +13,29 @@ class Interface():
         self.__res_x, self.__res_y = 16*self.__res_factor, 9*self.__res_factor
         self.__colorDepth = 32
         self.__running = True
-        self.__player = Ship('The Kestral')
-        self.__ships = {'Player':self.__player}
-        self.__stars = pygame.Surface((self.__res_x, self.__res_y), depth=self.__colorDepth, flags=pygame.SRCALPHA)
+        self.__stars = pygame.Surface((self.__res_x*4, self.__res_y*4), depth=self.__colorDepth, flags=pygame.SRCALPHA)
         self.__infoPanel = pygame.Surface((0,0), depth=self.__colorDepth, flags=pygame.SRCALPHA)#, flags=pygame.SRCALPHA
         self.__targetPanel = pygame.Surface((0,0), depth=self.__colorDepth, flags=pygame.SRCALPHA)
         self.__statusBar = pygame.Surface((0,0), depth=self.__colorDepth, flags=pygame.SRCALPHA)
+        self.__playingField = pygame.Surface((self.__res_x*4, self.__res_y*4), depth=self.__colorDepth, flags=pygame.SRCALPHA)
         self.__uiUpdateSpeed = 0.1
         self.__threads = []
         self.__shipTicks = {}
+        pos = {
+            'x':self.__playingField.get_width()/2,
+            'y':self.__playingField.get_height()/2,
+            'z':randint(0,360),
+            'x_dir':0,
+            'y_dir':0,
+            'z_dir':0,
+        }
+        maxDims = {
+            'x':self.__playingField.get_width(),
+            'y':self.__playingField.get_height(),
+            'z':800,
+        }
+        self.__player = Ship(name='The Kestral', pos=pos, maxDims=maxDims)
+        self.__ships = {'Player':self.__player}
 
     def __del__(self):
         pass
@@ -40,6 +54,8 @@ class Interface():
         self.__threads.append(Thread(target=self._statusBars, name='_statusBars'))
         self.__threads[-1].start()
         self.__threads.append(Thread(target=self._generateTargetPanel, name='_generateTargetPanel'))
+        self.__threads[-1].start()
+        self.__threads.append(Thread(target=self._drawPlayingField, name='_drawPlayingField'))
         self.__threads[-1].start()
         dt = 0
         while self.__running:
@@ -74,14 +90,21 @@ class Interface():
                 inputsKeys.append('q')
             if keys[pygame.K_e]:
                 inputsKeys.append('e')
+
+            # Add Ships to the World
+            
+
+            # Screen Drawing
             screen.fill(pygame.Color(0, 0, 0, 255))
-            screen.blit(self.__stars, dest=(0,0))#,special_flags=pygame.BLEND_ALPHA_SDL2)
+            screen.blit(self.__stars, dest=(0,0), area=(self.__player.getPos()['x'], self.__player.getPos()['y'], self.__res_x, self.__res_y))#,special_flags=pygame.BLEND_ALPHA_SDL2)
             if self.__debug:
                 fps = pygame.font.SysFont("Times New Roman", round(12*self.__guiScale)).render('fps: '+str(round(clock.get_fps())), True, (255, 255, 0))
                 screen.blit(fps, (0, 0))
                 timing = pygame.font.SysFont("Times New Roman", round(12*self.__guiScale)).render('elapsed time: '+str(round(pygame.time.get_ticks()/1000)), True, (255, 255, 0))
                 screen.blit(timing, (0, fps.get_height()))
-            if len(self.__ships) < 10:
+
+            # Adding Ships and Ticking Ships
+            if len(self.__ships) < 50:
                 self._generateShip()
                 validTargets = []
                 for i in self.__ships:
@@ -107,9 +130,15 @@ class Interface():
                             del self.__shipTicks[self.__ships[i].getStats()['Name']]
                             self.__shipTicks[self.__ships[i].getStats()['Name']] = Thread(target=self.__ships[i].tick, name=self.__ships[i].getStats()['Name'], kwargs={'timedelta':dt})
                             self.__shipTicks[self.__ships[i].getStats()['Name']].start()
+
+            screen.blit(self.__playingField, dest=(0,0), area=(self.__player.getPos()['x']-self.__res_x/2, self.__player.getPos()['y']-self.__res_y/2, self.__res_x, self.__res_y))
+
+            # Drawing UI elements
             screen.blit(self.__infoPanel, (0, self.__res_y-self.__infoPanel.get_height()))
             screen.blit(self.__targetPanel, (self.__res_x-self.__targetPanel.get_width(), self.__res_y-self.__targetPanel.get_height()))
             screen.blit(self.__statusBar, (self.__res_x/2-self.__statusBar.get_width()/2, 10))
+
+            # Update Screen
             pygame.display.flip()
             dt = clock.tick()/1000#60)
         pygame.quit()
@@ -211,7 +240,7 @@ class Interface():
             # for line in file:
             #     shipnames.append(line)
         name = shipnames[randint(0,len(shipnames)-1)]
-        maxStats = [randint(50,100), randint(50,100), randint(50,100), randint(50,100), randint(1,10), uniform(0.1,2), randint(1,10)]
+        maxStats = [randint(50,100), randint(50,100), randint(50,100), randint(50,100), randint(5,20), uniform(0.1,2), randint(1,10)]
         stats = {
             'Name':name, 
             'Type':'Viper', 
@@ -233,49 +262,84 @@ class Interface():
             'Cargo':randint(0,maxStats[6]),
             }
         pos = {
-            'x':randint(0,360),
-            'y':randint(0,360),
+            'x':randint(0,self.__playingField.get_width()),
+            'y':randint(0,self.__playingField.get_height()),
             'z':randint(0,360),
             'x_dir':randint(0,360),
             'y_dir':randint(0,360),
             'z_dir':randint(0,360),
         }
-        self.__ships[stats['Name']] = Ship(name=stats['Name'], stats=stats, pos=pos)
+        maxDims = {
+            'x':self.__playingField.get_width(),
+            'y':self.__playingField.get_height(),
+            'z':800,
+        }
+        self.__ships[stats['Name']] = Ship(name=stats['Name'], stats=stats, pos=pos, maxDims=maxDims)
 
     def _generateStars(self):
         # self.__stars.fill(pygame.Color(0,0,0,255))
+        colors = ['O', 'B', 'A', 'F', 'G', 'K', 'M']
+        # while True:
         self.__stars.fill(pygame.Color(0, 0, 25, 100))
         x = 0
-        while x <= self.__res_x:
+        while x <= self.__stars.get_width():
             y = 0
-            while y <= self.__res_y:
+            while y <= self.__stars.get_height():
                 rng = randint(0,10)
                 if rng == 1:
-                    r, radius = 0, randint(5,10)
-                    while r < radius:
-                        halo_alpha = randint(50,127)
-                        star_alpha = halo_alpha*2+1
-                        a, angle = 0, 360
-                        while a < angle:
-                            self.__stars.set_at((x+int(r*cos((radians(a)))),y+int(r*sin((radians(a))))), (255,255,0,halo_alpha))# Yellow
-                            self.__stars.set_at((x+int(r/2*cos((radians(a)))),y+int(r/2*sin((radians(a))))), (255,255,255,star_alpha)) # White
-                            a += 1
-                        r += 0.1
-                    # pygame.draw.rect(surface=self.__stars, color=pygame.Color(255, 255, 0,randint(0,150)),rect=pygame.Rect(x,y,uniform(0,10),uniform(0,5)))
-                    # pygame.draw.rect(surface=self.__stars, color=pygame.Color(255, 255, 255,randint(50,255)),rect=pygame.Rect(x,y,uniform(0,5),uniform(0,5)))
+                    color = randint(0,6)
+                    # print(color, colors[color])
+                    size = randint(1,5)
+                    halo = randint(1,3)
+                    if colors[color] == 'O':
+                        pygame.draw.circle(self.__stars, (100, 100, 255,randint(0,100)), (x, y), size+halo)
+                        pygame.draw.circle(self.__stars, (100, 100, 255,randint(100,255)), (x, y), size)
+                    elif colors[color] == 'B':
+                        pygame.draw.circle(self.__stars, (150, 150, 255,randint(0,100)), (x, y), size+halo)
+                        pygame.draw.circle(self.__stars, (150, 150, 255,randint(100,255)), (x, y), size)
+                    elif colors[color] == 'A':
+                        pygame.draw.circle(self.__stars, (200, 200, 255,randint(0,100)), (x, y), size+halo)
+                        pygame.draw.circle(self.__stars, (200, 200, 255,randint(100,255)), (x, y), size)
+                    elif colors[color] == 'F':
+                        pygame.draw.circle(self.__stars, (255, 255, 255,randint(0,100)), (x, y), size+halo)
+                        pygame.draw.circle(self.__stars, (255, 255, 255,randint(100,255)), (x, y), size)
+                    elif colors[color] == 'G':
+                        pygame.draw.circle(self.__stars, (255, 255, 100,randint(0,100)), (x, y), size+halo)
+                        pygame.draw.circle(self.__stars, (255, 255, 255,randint(100,255)), (x, y), size)
+                    elif colors[color] == 'K':
+                        pygame.draw.circle(self.__stars, (255, 165, 0,randint(0,100)), (x, y), size+halo)
+                        pygame.draw.circle(self.__stars, (255, 165, 0,randint(100,255)), (x, y), size)
+                    elif colors[color] == 'M':
+                        pygame.draw.circle(self.__stars, (255, 100, 100,randint(0,100)), (x, y), size+halo)
+                        pygame.draw.circle(self.__stars, (255, 100, 100,randint(100,255)), (x, y), size)
+                    else:
+                        pass
+                #     r, radius = 0, randint(5,10)
+                #     while r < radius:
+                #         halo_alpha = randint(50,127)
+                #         star_alpha = halo_alpha*2+1
+                #         a, angle = 0, 360
+                #         while a < angle:
+                #             self.__stars.set_at((x+int(r*cos((radians(a)))),y+int(r*sin((radians(a))))), (255,255,0,halo_alpha))# Yellow
+                #             self.__stars.set_at((x+int(r/2*cos((radians(a)))),y+int(r/2*sin((radians(a))))), (255,255,255,star_alpha)) # White
+                #             a += 1
+                #         r += 0.1
+                #     # pygame.draw.rect(surface=self.__stars, color=pygame.Color(255, 255, 0,randint(0,150)),rect=pygame.Rect(x,y,uniform(0,10),uniform(0,5)))
+                #     # pygame.draw.rect(surface=self.__stars, color=pygame.Color(255, 255, 255,randint(50,255)),rect=pygame.Rect(x,y,uniform(0,5),uniform(0,5)))
                 y += randint(20,50)
             x += randint(10,30)
-
-    def _drawRect(surface:pygame.Surface, x:int, y:int, width:int, height:int, color):
-        tempSurface=pygame.Surface((width,height),depth=32,flags=pygame.SRCALPHA)
-        x_pos = x
-        while x_pos < x+width:
-            y_pos = y
-            while y_pos < y+height:
-                tempSurface.set_at((x_pos,y_pos), color)
-                y_pos += 1
-            x_pos += 1
-        surface.blit(tempSurface, (x, y))
+            # time.sleep(1)
+    
+    def _drawPlayingField(self):
+        while self.__running:
+            self.__playingField.fill(pygame.Color(0, 0, 0, 0))
+            for i in self.__ships:
+                    # print(i)
+                    if i == 'Player':
+                        pass
+                    else:
+                        pygame.draw.rect(surface=self.__playingField, color=(255, 50, 50, 255), rect=(self.__ships[i].getPos()['x'], self.__ships[i].getPos()['y'], 10, 10))
+            time.sleep(0.1)
 # end Interface
         
 if __name__ == '__main__':
