@@ -1,6 +1,7 @@
 import pygame
 import time
 from ship import Ship
+from projectile import Projectile
 from threading import Thread
 from random import randint, uniform
 from math import fabs, cos, sin, radians
@@ -33,6 +34,7 @@ class Interface():
         }
         self.__player = Ship(name='The Kestral', pos=pos, maxDims=maxDims)
         self.__ships = {'Player':self.__player}
+        self.__projectiles = []
 
     def __del__(self):
         pass
@@ -97,14 +99,31 @@ class Interface():
             if keys[pygame.K_d]:
                 inputsKeys.append('d')
             if keys[pygame.K_SPACE]:
-                inputsKeys.append('space')
+                if self.__player.getStats()['Firing Cooldown'] <= 0:
+                    self._spawnProjectile(owner='Player')
+                    self.__player.fireWeapon()
             # if keys[pygame.K_q]:
             #     inputsKeys.append('q')
             # if keys[pygame.K_e]:
             #     inputsKeys.append('e')
 
-            # Adding Ships and Ticking Ships
-            # else:
+            # Screen Drawing
+            self.__screen.fill(pygame.Color(0, 0, 0, 255))
+            self.__screen.blit(self.__stars, dest=(0,0), area=(self.__player.getPos()['x']-self.__res_x/2, self.__player.getPos()['y']-self.__res_y/2, self.__res_x, self.__res_y))#,special_flags=pygame.BLEND_ALPHA_SDL2)
+            if self.__debug:
+                fps = pygame.font.SysFont("Times New Roman", round(12*self.__guiScale)).render('fps: '+str(round(clock.get_fps())), True, (255, 255, 0))
+                self.__screen.blit(fps, (0, 0))
+                timing = pygame.font.SysFont("Times New Roman", round(12*self.__guiScale)).render('elapsed time: '+str(round(pygame.time.get_ticks()/1000)), True, (255, 255, 0))
+                self.__screen.blit(timing, (0, fps.get_height()))
+            self._drawPlayingField()
+            self.__screen.blit(self.__playingField, dest=(0,0), area=(self.__player.getPos()['x']-self.__res_x/2, self.__player.getPos()['y']-self.__res_y/2, self.__res_x, self.__res_y))
+
+            # Drawing UI elements
+            self.__screen.blit(self.__statusBar, (self.__res_x/2-self.__statusBar.get_width()/2, 10))
+            self.__screen.blit(self.__infoPanel, (0, self.__res_y-self.__infoPanel.get_height()))
+            self.__screen.blit(self.__targetPanel, (self.__res_x-self.__targetPanel.get_width(), self.__res_y-self.__targetPanel.get_height()))
+
+            # Ticking Ships & Projectiles
             for i in self.__ships:
                 if i == 'Player':
                     self.__ships[i].tick(timedelta=dt, inputs=inputsKeys)
@@ -123,22 +142,8 @@ class Interface():
                         del self.__shipTicks[self.__ships[i].getStats()['Name']]
                         self.__shipTicks[self.__ships[i].getStats()['Name']] = Thread(target=self.__ships[i].tick, name=self.__ships[i].getStats()['Name'], kwargs={'timedelta':dt})
                         self.__shipTicks[self.__ships[i].getStats()['Name']].start()
-
-            # Screen Drawing
-            self.__screen.fill(pygame.Color(0, 0, 0, 255))
-            self.__screen.blit(self.__stars, dest=(0,0), area=(self.__player.getPos()['x']-self.__res_x/2, self.__player.getPos()['y']-self.__res_y/2, self.__res_x, self.__res_y))#,special_flags=pygame.BLEND_ALPHA_SDL2)
-            if self.__debug:
-                fps = pygame.font.SysFont("Times New Roman", round(12*self.__guiScale)).render('fps: '+str(round(clock.get_fps())), True, (255, 255, 0))
-                self.__screen.blit(fps, (0, 0))
-                timing = pygame.font.SysFont("Times New Roman", round(12*self.__guiScale)).render('elapsed time: '+str(round(pygame.time.get_ticks()/1000)), True, (255, 255, 0))
-                self.__screen.blit(timing, (0, fps.get_height()))
-            self._drawPlayingField()
-            self.__screen.blit(self.__playingField, dest=(0,0), area=(self.__player.getPos()['x']-self.__res_x/2, self.__player.getPos()['y']-self.__res_y/2, self.__res_x, self.__res_y))
-
-            # Drawing UI elements
-            self.__screen.blit(self.__statusBar, (self.__res_x/2-self.__statusBar.get_width()/2, 10))
-            self.__screen.blit(self.__infoPanel, (0, self.__res_y-self.__infoPanel.get_height()))
-            self.__screen.blit(self.__targetPanel, (self.__res_x-self.__targetPanel.get_width(), self.__res_y-self.__targetPanel.get_height()))
+            for i in self.__projectiles:
+                i.tick(timedelta=dt)
 
             # Update Screen
             pygame.display.flip()
@@ -334,7 +339,7 @@ class Interface():
             # for line in file:
             #     shipnames.append(line)
         name = shipnames[randint(0,len(shipnames)-1)]
-        maxStats = [randint(50,100), randint(50,100), randint(50,100), randint(50,100), randint(5,20), uniform(0.1,2), randint(1,10)]
+        maxStats = [randint(50,100), randint(50,100), randint(50,100), randint(50,100), randint(50,100), uniform(5,10), randint(1,5)]
         stats = {
             'Name':name, 
             'Type':'Viper', 
@@ -356,16 +361,16 @@ class Interface():
             'Cargo':randint(0,maxStats[6]),
             }
         pos = {
-            'x':randint(0,self.__playingField.get_width()),
-            'y':randint(0,self.__playingField.get_height()),
+            'x':randint(self.__playingField.get_width()/16,self.__playingField.get_width()-self.__playingField.get_width()/16),
+            'y':randint(self.__playingField.get_height()/9,self.__playingField.get_height()-self.__playingField.get_height()/9),
             # 'z':randint(0,360),
             'x_dir':randint(0,360),
             # 'y_dir':randint(0,360),
             # 'z_dir':randint(0,360),
         }
         maxDims = {
-            'x':self.__playingField.get_width()-self.__playingField.get_width()/8,
-            'y':self.__playingField.get_height()-self.__playingField.get_height()/8,
+            'x':self.__playingField.get_width(),
+            'y':self.__playingField.get_height(),
             # 'z':800,
         }
         self.__ships[stats['Name']] = Ship(name=stats['Name'], stats=stats, pos=pos, maxDims=maxDims)
@@ -425,7 +430,8 @@ class Interface():
             # time.sleep(1)
     
     def _drawPlayingField(self):
-        shipSize = 50
+        shipSize = 25
+        projectileSize = shipSize/10
         # tempSurface = pygame.Surface((self.__res_x*4, self.__res_y*4), depth=self.__colorDepth, flags=pygame.SRCALPHA)
         # while self.__running:
             # startTime = time.time()
@@ -489,7 +495,14 @@ class Interface():
                                 (shipPos['x']+shipSize*cos(radians(shipPos['x_dir']+225)), shipPos['y']+shipSize*sin(radians(shipPos['x_dir']+225)))
                                 ]
             )
-        
+        # tempSurface = pygame.Surface((projectileSize, projectileSize), depth=self.__colorDepth, flags=pygame.SRCALPHA)
+        for i in self.__projectiles:
+            pos = i.getPos()
+            pygame.draw.circle(surface=self.__playingField, color=(255, 0, 0, 200), radius=projectileSize, center=(pos['x'], pos['y']))
+            pygame.draw.circle(surface=self.__playingField, color=(255, 165, 0, 200), radius=projectileSize*.75, center=(pos['x'], pos['y']))
+            pygame.draw.circle(surface=self.__playingField, color=(255, 255, 0, 200), radius=projectileSize*.5, center=(pos['x'], pos['y']))
+            pygame.draw.circle(surface=self.__playingField, color=(255, 255, 255, 200), radius=projectileSize*.25, center=(pos['x'], pos['y']))
+
             # self.__playingField = tempSurface
             # self.__screen.blit(self.__playingField, dest=(0,0), area=(self.__player.getPos()['x']-self.__res_x/2, self.__player.getPos()['y']-self.__res_y/2, self.__res_x, self.__res_y))
             # print(self.__uiUpdateSpeed, time.time()-startTime, self.__uiUpdateSpeed-(time.time()-startTime))
@@ -499,6 +512,23 @@ class Interface():
             #     time.sleep(sleepTimer)
             # else:
             # time.sleep(self.__uiUpdateSpeed)
+        
+    def _spawnProjectile(self, owner:str):
+        if owner in self.__ships:
+            stats = {
+                'Owner':owner,
+                'Speed':self.__ships[owner].getStats()['Speed']+100,
+            }
+            pos = {
+                'x':self.__ships[owner].getPos()['x'], 
+                'y':self.__ships[owner].getPos()['y'], 
+                'dir':self.__ships[owner].getPos()['x_dir'],
+            }
+            maxDims = {
+                'x':self.__playingField.get_width()-self.__playingField.get_width()/8,
+                'y':self.__playingField.get_height()-self.__playingField.get_height()/8,
+            }
+            self.__projectiles.append(Projectile(stats=stats, pos=pos, maxDims=maxDims))
 # end Interface
         
 if __name__ == '__main__':

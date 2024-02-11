@@ -18,10 +18,12 @@ class Ship():
                 'Max Speed':100, 
                 'Speed':0.0,
                 'Max Acceleration':10,
-                'Acceleration Rampup':2, 
+                'Acceleration Rampup':5, 
                 'Acceleration':0.0, 
                 'Max Cargo':10,
                 'Cargo':2,
+                'Fire Rate':3,
+                'Firing Cooldown':0,
             }
         self.__pos = {
             'x':0,
@@ -101,6 +103,9 @@ class Ship():
     def setValidTargets(self, validTargets:list):
         self.__validTargets = validTargets
 
+    def fireWeapon(self, weapon:str=None):
+        self.__stats['Firing Cooldown'] = self.__stats['Fire Rate']
+
     def tick(self, timedelta:float=None, inputs:list=None):
         # Key Inputs
         if inputs != None:
@@ -148,6 +153,7 @@ class Ship():
                     else:
                         self.__pos['x_dir'] += self.__stats['Rotation Speed']*timedelta-360
                 elif i == 'space': # Fire!
+                    # self.__stats['Firing Cooldwon'] = 
                     pass
                 # elif i == 'q': # Roll Counter-Clockwise
                 #     if self.__pos['z_dir']+self.__stats['Rotation Speed']*timedelta <= 360:
@@ -181,14 +187,21 @@ class Ship():
         # Speed
         if fabs(self.__stats['Speed']) > 0.0:
             self.__pos['x'] += self.__stats['Speed']*cos(radians(self.__pos['x_dir']))*timedelta
-            if self.__pos['x'] > self.__maxDims['x']-self.__maxDims['x']*2/16:
-                self.__pos['x'] = self.__pos['x']-self.__maxDims['x']+self.__maxDims['x']/16
+            if self.__pos['x'] > self.__maxDims['x']-self.__maxDims['x']/16:
+                self.__pos['x'] = self.__maxDims['x']-self.__pos['x']#+self.__maxDims['x']/16
             elif self.__pos['x'] < 0+self.__maxDims['x']/16:
-                self.__pos['x'] = self.__pos['x']+self.__maxDims['x']-self.__maxDims['x']*2/16
+                self.__pos['x'] = self.__maxDims['x']-self.__pos['x']#-self.__maxDims['x']/16
             
             self.__pos['y'] += self.__stats['Speed']*sin(radians(self.__pos['x_dir']))*timedelta
-            if self.__pos['y'] > self.__maxDims['y']-self.__maxDims['y']*2/9:
-                self.__pos['y'] = self.__pos['y']-self.__maxDims['y']+self.__maxDims['y']/9
+            if self.__pos['y'] > self.__maxDims['y']-self.__maxDims['y']/9:
+                self.__pos['y'] = self.__maxDims['y']-self.__pos['y']#+self.__maxDims['y']/9
             elif self.__pos['y'] < 0+self.__maxDims['y']/9:
-                self.__pos['y'] = self.__pos['y']+self.__maxDims['y']-self.__maxDims['y']*2/9
+                self.__pos['y'] = self.__maxDims['y']-self.__pos['y']#self.__maxDims['y']/9
+
+        # self.__playingField.get_width()-self.__playingField.get_width()*2/16, 
+        # self.__playingField.get_height()-self.__playingField.get_height()*2/9
+        if self.__stats['Firing Cooldown'] > 0:
+            self.__stats['Firing Cooldown'] -= 1*timedelta
+        else:
+            self.__stats['Firing Cooldown'] = 0
 # end Ship
