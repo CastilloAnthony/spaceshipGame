@@ -1,4 +1,4 @@
-from math import fabs, cos, radians
+from math import fabs, cos, sin, radians
 
 class Ship():
     def __init__(self, name:str=None, stats=None, pos=None, maxDims:dict=None):
@@ -14,11 +14,11 @@ class Ship():
                 'Shields':0, 
                 'Shield Recharge Rate':5,
                 'Sheild Recharge Delay':5,
-                'Rotation Speed':10,
+                'Rotation Speed':30,
                 'Max Speed':100, 
                 'Speed':0.0,
-                'Max Acceleration':1,
-                'Acceleration Rampup':0.1, 
+                'Max Acceleration':10,
+                'Acceleration Rampup':2, 
                 'Acceleration':0.0, 
                 'Max Cargo':10,
                 'Cargo':2,
@@ -26,15 +26,11 @@ class Ship():
         self.__pos = {
             'x':0,
             'y':0,
-            'z':0,
             'x_dir':0,
-            'y_dir':0,
-            'z_dir':0,
         }
         self.__maxDims = {
             'x':800,
             'y':600,
-            'z':800,
         }
         if stats != None:
             self.__stats.update(stats)
@@ -110,10 +106,16 @@ class Ship():
         if inputs != None:
             for i in inputs:
                 # print(i)
-                if i == 'LSHIFT': # Accelerate Forwards
+                # if i == 'LSHIFT': # Accelerate Forwards
+                #     if self.__stats['Acceleration']+self.__stats['Acceleration Rampup']*timedelta <= self.__stats['Max Acceleration']:
+                #         self.__stats['Acceleration'] += self.__stats['Acceleration Rampup']*timedelta
+                # elif i == 'LCTRL': # Accelerate Backwards
+                #     if self.__stats['Acceleration']-self.__stats['Acceleration Rampup']*timedelta >= -self.__stats['Max Acceleration']:
+                #         self.__stats['Acceleration'] -= self.__stats['Acceleration Rampup']*timedelta
+                if i == 'w':
                     if self.__stats['Acceleration']+self.__stats['Acceleration Rampup']*timedelta <= self.__stats['Max Acceleration']:
                         self.__stats['Acceleration'] += self.__stats['Acceleration Rampup']*timedelta
-                elif i == 'LCTRL': # Accelerate Backwards
+                elif i == 's':
                     if self.__stats['Acceleration']-self.__stats['Acceleration Rampup']*timedelta >= -self.__stats['Max Acceleration']:
                         self.__stats['Acceleration'] -= self.__stats['Acceleration Rampup']*timedelta
                 elif i == 'x': # Stop Acceleration & Possibly Speed
@@ -125,36 +127,38 @@ class Ship():
                         self.__stats['Acceleration'] -= self.__stats['Acceleration Rampup']*timedelta
                     elif self.__stats['Acceleration'] < 0.0:
                         self.__stats['Acceleration'] += self.__stats['Acceleration Rampup']*timedelta
-                elif i == 's': # Pitch Upwards
-                    if self.__pos['y_dir']+self.__stats['Rotation Speed']*timedelta <= 360:
-                        self.__pos['y_dir'] += self.__stats['Rotation Speed']*timedelta
-                    else:
-                        self.__pos['y_dir'] += self.__stats['Rotation Speed']*timedelta-360
-                elif i == 'w': # Pitch Downwards
-                    if self.__pos['y_dir']-self.__stats['Rotation Speed']*timedelta >= 0:
-                        self.__pos['y_dir'] -= self.__stats['Rotation Speed']*timedelta
-                    else:
-                        self.__pos['y_dir'] += 360-self.__stats['Rotation Speed']*timedelta
-                elif i == 'a': # Yaw Left
-                    if self.__pos['x_dir']+self.__stats['Rotation Speed']*timedelta <= 360:
-                        self.__pos['x_dir'] += self.__stats['Rotation Speed']*timedelta
-                    else:
-                        self.__pos['x_dir'] += self.__stats['Rotation Speed']*timedelta-360
-                elif i == 'd': # Yaw Right
+                # elif i == 's': # Pitch Upwards
+                #     if self.__pos['y_dir']+self.__stats['Rotation Speed']*timedelta <= 360:
+                #         self.__pos['y_dir'] += self.__stats['Rotation Speed']*timedelta
+                #     else:
+                #         self.__pos['y_dir'] += self.__stats['Rotation Speed']*timedelta-360
+                # elif i == 'w': # Pitch Downwards
+                #     if self.__pos['y_dir']-self.__stats['Rotation Speed']*timedelta >= 0:
+                #         self.__pos['y_dir'] -= self.__stats['Rotation Speed']*timedelta
+                #     else:
+                #         self.__pos['y_dir'] += 360-self.__stats['Rotation Speed']*timedelta
+                elif i == 'a': # Rotate Counter-Clockwise
                     if self.__pos['x_dir']-self.__stats['Rotation Speed']*timedelta >= 0:
                         self.__pos['x_dir'] -= self.__stats['Rotation Speed']*timedelta
                     else:
                         self.__pos['x_dir'] += 360-self.__stats['Rotation Speed']*timedelta
-                elif i == 'q': # Roll Counter-Clockwise
-                    if self.__pos['z_dir']+self.__stats['Rotation Speed']*timedelta <= 360:
-                        self.__pos['z_dir'] += self.__stats['Rotation Speed']*timedelta
+                elif i == 'd': # Rotate Clockwise
+                    if self.__pos['x_dir']+self.__stats['Rotation Speed']*timedelta <= 360:
+                        self.__pos['x_dir'] += self.__stats['Rotation Speed']*timedelta
                     else:
-                        self.__pos['z_dir'] += self.__stats['Rotation Speed']*timedelta-360
-                elif i == 'e': # Roll Clockwise
-                    if self.__pos['z_dir']-self.__stats['Rotation Speed']*timedelta >= 0:
-                        self.__pos['z_dir'] -= self.__stats['Rotation Speed']*timedelta
-                    else:
-                        self.__pos['z_dir'] += 360-self.__stats['Rotation Speed']*timedelta
+                        self.__pos['x_dir'] += self.__stats['Rotation Speed']*timedelta-360
+                elif i == 'space': # Fire!
+                    pass
+                # elif i == 'q': # Roll Counter-Clockwise
+                #     if self.__pos['z_dir']+self.__stats['Rotation Speed']*timedelta <= 360:
+                #         self.__pos['z_dir'] += self.__stats['Rotation Speed']*timedelta
+                #     else:
+                #         self.__pos['z_dir'] += self.__stats['Rotation Speed']*timedelta-360
+                # elif i == 'e': # Roll Clockwise
+                #     if self.__pos['z_dir']-self.__stats['Rotation Speed']*timedelta >= 0:
+                #         self.__pos['z_dir'] -= self.__stats['Rotation Speed']*timedelta
+                #     else:
+                #         self.__pos['z_dir'] += 360-self.__stats['Rotation Speed']*timedelta
 
         # Shield Info
         if self.__shield_recharge_delay <= 0:
@@ -177,31 +181,14 @@ class Ship():
         # Speed
         if fabs(self.__stats['Speed']) > 0.0:
             self.__pos['x'] += self.__stats['Speed']*cos(radians(self.__pos['x_dir']))*timedelta
-            if self.__pos['x'] > self.__maxDims['x']:
-                self.__pos['x'] = self.__pos['x']-self.__maxDims['x']
-                # self.__pos['y'] = self.__pos['y']-self.__maxDims['y']
-                # self.__pos['z'] = self.__pos['z']-self.__maxDims['z']
-            elif self.__pos['x'] < 0:
-                self.__pos['x'] = self.__pos['x']+self.__maxDims['x']
-                # self.__pos['y'] = self.__pos['y']+self.__maxDims['y']
-                # self.__pos['z'] = self.__pos['z']+self.__maxDims['z']
-            self.__pos['y'] += self.__stats['Speed']*cos(radians(self.__pos['y_dir']))*timedelta
-            if self.__pos['y'] > self.__maxDims['y']:
-                # self.__pos['x'] = self.__pos['x']-self.__maxDims['x']
-                self.__pos['y'] = self.__pos['y']-self.__maxDims['y']
-                # self.__pos['z'] = self.__pos['z']-self.__maxDims['z']
-            if self.__pos['y'] < 0:
-                # self.__pos['x'] = self.__pos['x']+self.__maxDims['x']
-                self.__pos['y'] = self.__pos['y']+self.__maxDims['y']
-                # self.__pos['z'] = self.__pos['z']+self.__maxDims['z']
-            self.__pos['z'] += self.__stats['Speed']*cos(radians(self.__pos['z_dir']))*timedelta
-            if self.__pos['z'] > self.__maxDims['z']:
-                # self.__pos['x'] = self.__pos['x']-self.__maxDims['x']
-                # self.__pos['y'] = self.__pos['y']-self.__maxDims['y']
-                self.__pos['z'] = self.__pos['z']-self.__maxDims['z']
-            elif self.__pos['z'] < 0:
-                # self.__pos['x'] = self.__pos['x']+self.__maxDims['x']
-                # self.__pos['y'] = self.__pos['y']+self.__maxDims['y']
-                self.__pos['z'] = self.__pos['z']+self.__maxDims['z']
-        # elif self.__stats['Speed']+self.__stats['Acceleration'] > self.__stats['Max Speed']:
+            if self.__pos['x'] > self.__maxDims['x']-self.__maxDims['x']*2/16:
+                self.__pos['x'] = self.__pos['x']-self.__maxDims['x']+self.__maxDims['x']/16
+            elif self.__pos['x'] < 0+self.__maxDims['x']/16:
+                self.__pos['x'] = self.__pos['x']+self.__maxDims['x']-self.__maxDims['x']*2/16
+            
+            self.__pos['y'] += self.__stats['Speed']*sin(radians(self.__pos['x_dir']))*timedelta
+            if self.__pos['y'] > self.__maxDims['y']-self.__maxDims['y']*2/9:
+                self.__pos['y'] = self.__pos['y']-self.__maxDims['y']+self.__maxDims['y']/9
+            elif self.__pos['y'] < 0+self.__maxDims['y']/9:
+                self.__pos['y'] = self.__pos['y']+self.__maxDims['y']-self.__maxDims['y']*2/9
 # end Ship
