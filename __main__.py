@@ -147,7 +147,7 @@ class Interface():
 
             # Update Screen
             pygame.display.flip()
-            dt = clock.tick()/1000#60)
+            dt = clock.tick(60)/1000#60)
             self.__uiUpdateSpeed = dt
         pygame.quit()
         
@@ -242,95 +242,95 @@ class Interface():
             # else:
             time.sleep(self.__uiUpdateSpeed)
 
-    def _generateInfoPanel(self):
-        while self.__running:
-            statsHeight = 0
-            maxWidth = 0
-            info = []
-            title = pygame.font.SysFont("Times New Roman", round(12*self.__guiScale)).render('Info Panel', True, (0, 0, 0))
-            info.append(title)
-            # infoPanel.blit(title, (0,0))
-            statsHeight += title.get_height()
-            playerStats = self.__player.displayStats()
-            for i in playerStats:
-                # stat = pygame.font.SysFont("Times New Roman", round(12*self.__guiScale)).render(i+': '+str(playerStats[i]), True, (0, 0, 0))
-                if isinstance(playerStats[i], float):
-                    info.append(pygame.font.SysFont("Times New Roman", round(12*self.__guiScale)).render(i+': '+str(round(playerStats[i],1)), True, (0, 0, 0)))
-                else:
-                    info.append(pygame.font.SysFont("Times New Roman", round(12*self.__guiScale)).render(i+': '+str(playerStats[i]), True, (0, 0, 0)))
-                # infoPanel.blit(stat, (0, 0+statsHeight))#self.__res_y*(2/10)-stat.get_height()-statsHeight))#statsHeight))
-                statsHeight += info[-1].get_height()
-                if info[-1].get_width() > maxWidth:
-                    maxWidth = info[-1].get_width()
-            infoPanel = pygame.Surface((maxWidth, statsHeight), depth=self.__colorDepth, flags=pygame.SRCALPHA)
-            infoPanel.fill(pygame.Color(0, 150, 200, 200))
-            height = 0
-            for i, v in enumerate(info):
-                if i == 0:
-                    infoPanel.blit(v, (maxWidth/2-v.get_width()/2, height))#self.__res_y*(2/10)-stat.get_height()-statsHeight))#statsHeight))
-                    height += v.get_height()
-                else:
-                    infoPanel.blit(v, (0, height))#self.__res_y*(2/10)-stat.get_height()-statsHeight))#statsHeight))
-                    height += v.get_height()
-            infoPanelBack = pygame.Surface((maxWidth*1.1, statsHeight*1.1), depth=self.__colorDepth, flags=pygame.SRCALPHA)
-            infoPanelBack.fill(pygame.Color(0,150,150, 100))
-            infoPanelBack.blit(infoPanel, (maxWidth*1.1/2-infoPanel.get_width()/2,statsHeight*0.05))
-            self.__infoPanel = infoPanelBack#pygame.transform.scale(infoPanel, (self.__res_factor*3,self.__res_factor*5))
-            time.sleep(self.__uiUpdateSpeed)
-            # return infoPanel
+    # def _generateInfoPanel(self):
+    #     while self.__running:
+    #         statsHeight = 0
+    #         maxWidth = 0
+    #         info = []
+    #         title = pygame.font.SysFont("Times New Roman", round(12*self.__guiScale)).render('Info Panel', True, (0, 0, 0))
+    #         info.append(title)
+    #         # infoPanel.blit(title, (0,0))
+    #         statsHeight += title.get_height()
+    #         playerStats = self.__player.displayStats()
+    #         for i in playerStats:
+    #             # stat = pygame.font.SysFont("Times New Roman", round(12*self.__guiScale)).render(i+': '+str(playerStats[i]), True, (0, 0, 0))
+    #             if isinstance(playerStats[i], float):
+    #                 info.append(pygame.font.SysFont("Times New Roman", round(12*self.__guiScale)).render(i+': '+str(round(playerStats[i],1)), True, (0, 0, 0)))
+    #             else:
+    #                 info.append(pygame.font.SysFont("Times New Roman", round(12*self.__guiScale)).render(i+': '+str(playerStats[i]), True, (0, 0, 0)))
+    #             # infoPanel.blit(stat, (0, 0+statsHeight))#self.__res_y*(2/10)-stat.get_height()-statsHeight))#statsHeight))
+    #             statsHeight += info[-1].get_height()
+    #             if info[-1].get_width() > maxWidth:
+    #                 maxWidth = info[-1].get_width()
+    #         infoPanel = pygame.Surface((maxWidth, statsHeight), depth=self.__colorDepth, flags=pygame.SRCALPHA)
+    #         infoPanel.fill(pygame.Color(0, 150, 200, 200))
+    #         height = 0
+    #         for i, v in enumerate(info):
+    #             if i == 0:
+    #                 infoPanel.blit(v, (maxWidth/2-v.get_width()/2, height))#self.__res_y*(2/10)-stat.get_height()-statsHeight))#statsHeight))
+    #                 height += v.get_height()
+    #             else:
+    #                 infoPanel.blit(v, (0, height))#self.__res_y*(2/10)-stat.get_height()-statsHeight))#statsHeight))
+    #                 height += v.get_height()
+    #         infoPanelBack = pygame.Surface((maxWidth*1.1, statsHeight*1.1), depth=self.__colorDepth, flags=pygame.SRCALPHA)
+    #         infoPanelBack.fill(pygame.Color(0,150,150, 100))
+    #         infoPanelBack.blit(infoPanel, (maxWidth*1.1/2-infoPanel.get_width()/2,statsHeight*0.05))
+    #         self.__infoPanel = infoPanelBack#pygame.transform.scale(infoPanel, (self.__res_factor*3,self.__res_factor*5))
+    #         time.sleep(self.__uiUpdateSpeed)
+    #         # return infoPanel
     
-    def _generateTargetPanel(self):
-        while self.__running:
-            if self.__player.getTarget() in self.__ships:
-                target = self.__ships[self.__player.getTarget()]
-                statsHeight = 0
-                maxWidth = 0
-                targetInfo = []
-                title = pygame.font.SysFont("Times New Roman", round(12*self.__guiScale)).render('Target Panel', True, (0, 0, 0))
-                targetInfo.append(title)
-                # infoPanel.blit(title, (0,0))
-                statsHeight += title.get_height()
-                targetStats = target.displayStats()
-                for i in targetStats:
-                    # stat = pygame.font.SysFont("Times New Roman", round(12*self.__guiScale)).render(i+': '+str(playerStats[i]), True, (0, 0, 0))
-                    if isinstance(targetStats[i], float):
-                        targetInfo.append(pygame.font.SysFont("Times New Roman", round(12*self.__guiScale)).render(i+': '+str(round(targetStats[i], 1)), True, (0, 0, 0)))
-                    else:
-                        targetInfo.append(pygame.font.SysFont("Times New Roman", round(12*self.__guiScale)).render(i+': '+str(targetStats[i]), True, (0, 0, 0)))
-                    # infoPanel.blit(stat, (0, 0+statsHeight))#self.__res_y*(2/10)-stat.get_height()-statsHeight))#statsHeight))
-                    statsHeight += targetInfo[-1].get_height()
-                    if targetInfo[-1].get_width() > maxWidth:
-                        maxWidth = targetInfo[-1].get_width()
-                targetPanel = pygame.Surface((maxWidth, statsHeight), depth=self.__colorDepth, flags=pygame.SRCALPHA)
-                targetPanel.fill(pygame.Color(0, 150, 200, 200))
-                height = 0
-                for i, v in enumerate(targetInfo):
-                    if i == 0:
-                        targetPanel.blit(v, (maxWidth/2-v.get_width()/2, height))#self.__res_y*(2/10)-stat.get_height()-statsHeight))#statsHeight))
-                        height += v.get_height()
-                    else:
-                        targetPanel.blit(v, (0, height))#self.__res_y*(2/10)-stat.get_height()-statsHeight))#statsHeight))
-                        height += v.get_height()
-                targetPanelBack = pygame.Surface((maxWidth*1.1, statsHeight*1.1), depth=self.__colorDepth, flags=pygame.SRCALPHA)
-                targetPanelBack.fill(pygame.Color(0,150,150, 100))
-                targetPanelBack.blit(targetPanel, (maxWidth*1.1/2-targetPanel.get_width()/2,statsHeight*0.05))
-                self.__targetPanel = targetPanelBack
-            else: 
-                self.__targetPanel = pygame.Surface((0,0), depth=self.__colorDepth, flags=pygame.SRCALPHA)
-            time.sleep(self.__uiUpdateSpeed)
-            # return targetPanel
+    # def _generateTargetPanel(self):
+    #     while self.__running:
+    #         if self.__player.getTarget() in self.__ships:
+    #             target = self.__ships[self.__player.getTarget()]
+    #             statsHeight = 0
+    #             maxWidth = 0
+    #             targetInfo = []
+    #             title = pygame.font.SysFont("Times New Roman", round(12*self.__guiScale)).render('Target Panel', True, (0, 0, 0))
+    #             targetInfo.append(title)
+    #             # infoPanel.blit(title, (0,0))
+    #             statsHeight += title.get_height()
+    #             targetStats = target.displayStats()
+    #             for i in targetStats:
+    #                 # stat = pygame.font.SysFont("Times New Roman", round(12*self.__guiScale)).render(i+': '+str(playerStats[i]), True, (0, 0, 0))
+    #                 if isinstance(targetStats[i], float):
+    #                     targetInfo.append(pygame.font.SysFont("Times New Roman", round(12*self.__guiScale)).render(i+': '+str(round(targetStats[i], 1)), True, (0, 0, 0)))
+    #                 else:
+    #                     targetInfo.append(pygame.font.SysFont("Times New Roman", round(12*self.__guiScale)).render(i+': '+str(targetStats[i]), True, (0, 0, 0)))
+    #                 # infoPanel.blit(stat, (0, 0+statsHeight))#self.__res_y*(2/10)-stat.get_height()-statsHeight))#statsHeight))
+    #                 statsHeight += targetInfo[-1].get_height()
+    #                 if targetInfo[-1].get_width() > maxWidth:
+    #                     maxWidth = targetInfo[-1].get_width()
+    #             targetPanel = pygame.Surface((maxWidth, statsHeight), depth=self.__colorDepth, flags=pygame.SRCALPHA)
+    #             targetPanel.fill(pygame.Color(0, 150, 200, 200))
+    #             height = 0
+    #             for i, v in enumerate(targetInfo):
+    #                 if i == 0:
+    #                     targetPanel.blit(v, (maxWidth/2-v.get_width()/2, height))#self.__res_y*(2/10)-stat.get_height()-statsHeight))#statsHeight))
+    #                     height += v.get_height()
+    #                 else:
+    #                     targetPanel.blit(v, (0, height))#self.__res_y*(2/10)-stat.get_height()-statsHeight))#statsHeight))
+    #                     height += v.get_height()
+    #             targetPanelBack = pygame.Surface((maxWidth*1.1, statsHeight*1.1), depth=self.__colorDepth, flags=pygame.SRCALPHA)
+    #             targetPanelBack.fill(pygame.Color(0,150,150, 100))
+    #             targetPanelBack.blit(targetPanel, (maxWidth*1.1/2-targetPanel.get_width()/2,statsHeight*0.05))
+    #             self.__targetPanel = targetPanelBack
+    #         else: 
+    #             self.__targetPanel = pygame.Surface((0,0), depth=self.__colorDepth, flags=pygame.SRCALPHA)
+    #         time.sleep(self.__uiUpdateSpeed)
+    #         # return targetPanel
 
-    def _statusBars(self):
-        while self.__running:
-            width = self.__res_x/2
-            height = self.__res_y/20
-            statusBars = pygame.Surface((width, height), depth=self.__colorDepth, flags=pygame.SRCALPHA)
-            statusBars.fill(pygame.Color(0,150,150,100))
-            # self._drawRect(surface=statusBars, x=0, y=0, width=width, height=height, color=(0,150,150,100))
-            pygame.draw.rect(surface=statusBars, color=pygame.Color(0,255,0,200), rect=pygame.Rect(width/50,height-height/10*8,(width-width/50*2)*self.__player.getStats()['Hull']/self.__player.getStats()['Max Hull'],height/4))
-            pygame.draw.rect(surface=statusBars, color=pygame.Color(0,100,255,200), rect=pygame.Rect(width/50,height-height/10*4,(width-width/50*2)*self.__player.getStats()['Shields']/self.__player.getStats()['Max Shields'],height/4))
-            self.__statusBar = statusBars
-            time.sleep(self.__uiUpdateSpeed)
+    # def _statusBars(self):
+    #     while self.__running:
+    #         width = self.__res_x/2
+    #         height = self.__res_y/20
+    #         statusBars = pygame.Surface((width, height), depth=self.__colorDepth, flags=pygame.SRCALPHA)
+    #         statusBars.fill(pygame.Color(0,150,150,100))
+    #         # self._drawRect(surface=statusBars, x=0, y=0, width=width, height=height, color=(0,150,150,100))
+    #         pygame.draw.rect(surface=statusBars, color=pygame.Color(0,255,0,200), rect=pygame.Rect(width/50,height-height/10*8,(width-width/50*2)*self.__player.getStats()['Hull']/self.__player.getStats()['Max Hull'],height/4))
+    #         pygame.draw.rect(surface=statusBars, color=pygame.Color(0,100,255,200), rect=pygame.Rect(width/50,height-height/10*4,(width-width/50*2)*self.__player.getStats()['Shields']/self.__player.getStats()['Max Shields'],height/4))
+    #         self.__statusBar = statusBars
+    #         time.sleep(self.__uiUpdateSpeed)
 
     def _generateShip(self):
         shipnames = []
@@ -376,9 +376,7 @@ class Interface():
         self.__ships[stats['Name']] = Ship(name=stats['Name'], stats=stats, pos=pos, maxDims=maxDims)
 
     def _generateStars(self):
-        # self.__stars.fill(pygame.Color(0,0,0,255))
         colors = ['O', 'B', 'A', 'F', 'G', 'K', 'M']
-        # while True:
         self.__stars.fill(pygame.Color(0, 0, 25, 100))
         x = 0
         while x <= self.__stars.get_width():
@@ -387,7 +385,6 @@ class Interface():
                 rng = randint(0,10)
                 if rng == 1:
                     color = randint(0,6)
-                    # print(color, colors[color])
                     size = randint(1,5)
                     halo = randint(1,3)
                     if colors[color] == 'O':
@@ -413,30 +410,15 @@ class Interface():
                         pygame.draw.circle(self.__stars, (255, 100, 100,randint(100,200)), (x, y), size)
                     else:
                         pass
-                #     r, radius = 0, randint(5,10)
-                #     while r < radius:
-                #         halo_alpha = randint(50,127)
-                #         star_alpha = halo_alpha*2+1
-                #         a, angle = 0, 360
-                #         while a < angle:
-                #             self.__stars.set_at((x+int(r*cos((radians(a)))),y+int(r*sin((radians(a))))), (255,255,0,halo_alpha))# Yellow
-                #             self.__stars.set_at((x+int(r/2*cos((radians(a)))),y+int(r/2*sin((radians(a))))), (255,255,255,star_alpha)) # White
-                #             a += 1
-                #         r += 0.1
-                #     # pygame.draw.rect(surface=self.__stars, color=pygame.Color(255, 255, 0,randint(0,150)),rect=pygame.Rect(x,y,uniform(0,10),uniform(0,5)))
-                #     # pygame.draw.rect(surface=self.__stars, color=pygame.Color(255, 255, 255,randint(50,255)),rect=pygame.Rect(x,y,uniform(0,5),uniform(0,5)))
                 y += randint(20,50)
             x += randint(10,30)
-            # time.sleep(1)
     
     def _drawPlayingField(self):
-        shipSize = 25
+        shipSize = 100
         projectileSize = shipSize/10
-        # tempSurface = pygame.Surface((self.__res_x*4, self.__res_y*4), depth=self.__colorDepth, flags=pygame.SRCALPHA)
-        # while self.__running:
-            # startTime = time.time()
-            # tempSurface.fill(pygame.Color(0, 0, 0, 0))
         self.__playingField.fill(pygame.Color(0, 0, 0, 0))
+
+        # Drawing PlayingField Boundaries
         pygame.draw.rect(
             surface=self.__playingField, 
             color=(255, 255, 255, 255), 
@@ -448,81 +430,119 @@ class Interface():
                 ), 
                 width=1
             )
+        
+        # Drawing Non-player ships
         for i in self.__ships:
             # print(i)
             shipPos = self.__ships[i].getPos()
             shipInfo = self.__ships[i].getStats()
-            pygame.draw.ellipse(
-                    surface=self.__playingField, 
-                    color=(100, 100, 200, int(50*shipInfo['Shields']/shipInfo['Max Shields'])), 
-                    rect=(
-                        shipPos['x']-shipSize*1.5,
-                        shipPos['y']-shipSize*1.5,
-                        shipSize*3,
-                        shipSize*3,
-                        )
-                )
-            if i == 'Player':
+            shipSurface = pygame.Surface((shipSize*3, shipSize*3), depth=self.__colorDepth, flags=pygame.SRCALPHA)
+            if i == 'Player': # We want to draw the player after drawing all the other ships
                 pass
             else:
-                pygame.draw.polygon(surface=self.__playingField, color=(255, 50, 50, 255),
-                                    points=[
-                                        (shipPos['x']+shipSize*cos(radians(shipPos['x_dir'])), shipPos['y']+shipSize*sin(radians(shipPos['x_dir']))), 
-                                        (shipPos['x']+shipSize*cos(radians(shipPos['x_dir']+135)), shipPos['y']+shipSize*sin(radians(shipPos['x_dir']+135))), 
-                                        (shipPos['x']+shipSize*cos(radians(shipPos['x_dir']+225)), shipPos['y']+shipSize*sin(radians(shipPos['x_dir']+225)))
-                                        ])#, width=0)#(self.__ships[i].getPos()['x'], self.__ships[i].getPos()['y'], 10, 10), )
-                        # pygame.draw.rect()
+                if shipInfo['Shields'] > 0:
+                    pygame.draw.ellipse(
+                        surface=shipSurface, 
+                        color=(100, 100, 200, int(100*shipInfo['Shields']/shipInfo['Max Shields'])), 
+                        rect=(
+                            0,
+                            0,
+                            shipSize*3,
+                            shipSize*3,
+                            )
+                    )
+                pygame.draw.polygon(
+                    surface=shipSurface, 
+                    color=(255, 50, 50, 255),
+                    points=[
+                        (shipSize*1.5+shipSize*cos(radians(-shipPos['x_dir'])), shipSize*1.5+shipSize*sin(radians(-shipPos['x_dir']))), 
+                        (shipSize*1.5+shipSize*cos(radians(-shipPos['x_dir']+135)), shipSize*1.5+shipSize*sin(radians(-shipPos['x_dir']+135))), 
+                        (shipSize*1.5+shipSize*cos(radians(-shipPos['x_dir']+225)), shipSize*1.5+shipSize*sin(radians(-shipPos['x_dir']+225)))
+                    ]
+                )
+            if i == self.__player.getTarget():
+                pygame.draw.circle(surface=self.__playingField, color=(0, 0, 100, 150), radius=shipSize*1.5, width =int(shipSize/10), center=(shipPos['x'],shipPos['y']))
+                pygame.draw.circle(surface=self.__playingField, color=(50, 50, 255, 255), radius=shipSize*1.25, width=int(shipSize/20), center=(shipPos['x'],shipPos['y']))
+            self.__playingField.blit(shipSurface, (shipPos['x']-shipSize*1.5, shipPos['y']-shipSize*1.5))
+            del shipSurface
+
+        # Drawing Player
         shipPos = self.__player.getPos()
         shipInfo = self.__player.getStats()
-        if self.__player.getTarget() != None:
-            targetInfo = self.__ships[self.__player.getTarget()].getPos()
-            pygame.draw.circle(surface=self.__playingField, color=(0, 0, 100, 150), radius=shipSize*1.5, width = 5, center=(targetInfo['x'],targetInfo['y']))
-            pygame.draw.circle(surface=self.__playingField, color=(50, 50, 255, 255), radius=shipSize*1.25, width = 1, center=(targetInfo['x'],targetInfo['y']))
-        pygame.draw.ellipse(
-                surface=self.__playingField, 
-                color=(100, 100, 200, int(50*shipInfo['Shields']/shipInfo['Max Shields'])), 
-                rect=(
-                    shipPos['x']-shipSize*1.5,
-                    shipPos['y']-shipSize*1.5,
-                    shipSize*3,
-                    shipSize*3,
-                    )
+        shipSurface = pygame.Surface((shipSize*3, shipSize*3), depth=self.__colorDepth, flags=pygame.SRCALPHA)
+        if shipInfo['Shields'] > 0:
+            pygame.draw.ellipse(
+                        surface=shipSurface, 
+                        color=(100, 100, 200, int(100*shipInfo['Shields']/shipInfo['Max Shields'])), 
+                        rect=(
+                            0,
+                            0,
+                            shipSize*3,
+                            shipSize*3,
+                            )
             )
-        pygame.draw.polygon(surface=self.__playingField, color=(50, 50, 255, 255),
+            # shieldSurface = pygame.Surface((shipSize*3, shipSize*2), depth=self.__colorDepth, flags=pygame.SRCALPHA)
+            # pygame.draw.ellipse(
+            #         surface=shieldSurface, 
+            #         color=(100, 100, 200, int(100*shipInfo['Shields']/shipInfo['Max Shields'])), 
+            #         rect=(
+            #             0,#*cos(radians(-shipPos['x_dir'])),
+            #             0,
+            #             shipSize*3,
+            #             shipSize*2,
+            #             )
+            # )
+            # pygame.transform.rotate(surface=shieldSurface, angle=shipPos['x_dir'])
+            # shipSurface.blit(pygame.transform.rotate(surface=shieldSurface, angle=shipPos['x_dir']), (shipSize+shipSize*sin(radians(-shipPos['x_dir'])),shipSize*cos(radians(-shipPos['x_dir']))))
+            # del shieldSurface
+            # pygame.draw.polygon(surface=shipSurface, color=(100, 100, 200, int(100*shipInfo['Shields']/shipInfo['Max Shields'])),
+            #                 points=[
+            #                     (shipSize*1.5+(shipSize*1.5)*cos(radians(shipPos['x_dir'])), shipSize*1.5+(shipSize*1.5)*sin(radians(shipPos['x_dir']))), 
+            #                     (shipSize*1.5+(shipSize*1.5)*cos(radians(shipPos['x_dir']+135)), shipSize*1.5+(shipSize*1.5)*sin(radians(shipPos['x_dir']+135))), 
+            #                     (shipSize*1.5+(shipSize*1.5)*cos(radians(shipPos['x_dir']+225)), shipSize*1.5+(shipSize*1.5)*sin(radians(shipPos['x_dir']+225)))
+            #                     ]
+            # )
+        pygame.draw.polygon(surface=shipSurface, color=(50, 50, 255, 255),
                             points=[
-                                (shipPos['x']+shipSize*cos(radians(shipPos['x_dir'])), shipPos['y']+shipSize*sin(radians(shipPos['x_dir']))), 
-                                (shipPos['x']+shipSize*cos(radians(shipPos['x_dir']+135)), shipPos['y']+shipSize*sin(radians(shipPos['x_dir']+135))), 
-                                (shipPos['x']+shipSize*cos(radians(shipPos['x_dir']+225)), shipPos['y']+shipSize*sin(radians(shipPos['x_dir']+225)))
+                                (shipSize*1.5+shipSize*cos(radians(-shipPos['x_dir'])), shipSize*1.5+shipSize*sin(radians(-shipPos['x_dir']))), 
+                                (shipSize*1.5+shipSize*cos(radians(-shipPos['x_dir']+135)), shipSize*1.5+shipSize*sin(radians(-shipPos['x_dir']+135))), 
+                                (shipSize*1.5+shipSize*cos(radians(-shipPos['x_dir']+225)), shipSize*1.5+shipSize*sin(radians(-shipPos['x_dir']+225)))
                                 ]
-            )
-        # tempSurface = pygame.Surface((projectileSize, projectileSize), depth=self.__colorDepth, flags=pygame.SRCALPHA)
+        )
+        # pygame.draw.polygon(surface=shipSurface, color=(255, 165, 0, 255),
+        #                     points=[
+        #                         (shipSize*1.5-shipSize*1.1*cos(radians(-shipPos['x_dir'])), shipSize*1.5-shipSize*1.1*sin(radians(-shipPos['x_dir']))),  
+        #                         (shipSize*0.5+shipSize*1.0+shipSize*1.1*cos(radians(-shipPos['x_dir']+135)), shipSize*0.5+shipSize*1.0+shipSize*1.1*sin(radians(-shipPos['x_dir']+135))), 
+        #                         (shipSize*0.5+shipSize*1.0+shipSize*1.1*cos(radians(-shipPos['x_dir']+225)), shipSize*0.5+shipSize*1.0+shipSize*1.1*sin(radians(-shipPos['x_dir']+225)))
+        #                         ]
+        # )
+        self.__playingField.blit(shipSurface, (shipPos['x']-shipSize*1.5, shipPos['y']-shipSize*1.5))
+        del shipSurface
+
+        # Drawing Projectiles
+        projectileSurface = pygame.Surface((projectileSize, projectileSize), depth=self.__colorDepth, flags=pygame.SRCALPHA)
+        pygame.draw.circle(surface=projectileSurface, color=(255, 0, 0, 200), radius=projectileSize, center=(projectileSize/2, projectileSize/2))
+        pygame.draw.circle(surface=projectileSurface, color=(255, 165, 0, 200), radius=projectileSize*.75, center=(projectileSize/2, projectileSize/2))
+        pygame.draw.circle(surface=projectileSurface, color=(255, 255, 0, 200), radius=projectileSize*.5, center=(projectileSize/2, projectileSize/2))
+        pygame.draw.circle(surface=projectileSurface, color=(255, 255, 255, 200), radius=projectileSize*.25, center=(projectileSize/2, projectileSize/2))
         for i in self.__projectiles:
             pos = i.getPos()
-            pygame.draw.circle(surface=self.__playingField, color=(255, 0, 0, 200), radius=projectileSize, center=(pos['x'], pos['y']))
-            pygame.draw.circle(surface=self.__playingField, color=(255, 165, 0, 200), radius=projectileSize*.75, center=(pos['x'], pos['y']))
-            pygame.draw.circle(surface=self.__playingField, color=(255, 255, 0, 200), radius=projectileSize*.5, center=(pos['x'], pos['y']))
-            pygame.draw.circle(surface=self.__playingField, color=(255, 255, 255, 200), radius=projectileSize*.25, center=(pos['x'], pos['y']))
-
-            # self.__playingField = tempSurface
-            # self.__screen.blit(self.__playingField, dest=(0,0), area=(self.__player.getPos()['x']-self.__res_x/2, self.__player.getPos()['y']-self.__res_y/2, self.__res_x, self.__res_y))
-            # print(self.__uiUpdateSpeed, time.time()-startTime, self.__uiUpdateSpeed-(time.time()-startTime))
-            # self.__playingField = tempSurface
-            # sleepTimer = self.__uiUpdateSpeed-(time.time()-startTime)
-            # if sleepTimer > 0:
-            #     time.sleep(sleepTimer)
-            # else:
-            # time.sleep(self.__uiUpdateSpeed)
+            self.__playingField.blit(projectileSurface, (pos['x'], pos['y']))
+    # end _drawPlayingField
         
     def _spawnProjectile(self, owner:str):
+        shipSize = 100
+        projectileSize = shipSize/10
         if owner in self.__ships:
+            shipPos = self.__ships[owner].getPos()
             stats = {
                 'Owner':owner,
                 'Speed':self.__ships[owner].getStats()['Speed']+100,
             }
             pos = {
-                'x':self.__ships[owner].getPos()['x'], 
-                'y':self.__ships[owner].getPos()['y'], 
-                'dir':self.__ships[owner].getPos()['x_dir'],
+                'x':self.__ships[owner].getPos()['x']+shipSize*8/10*cos(radians(-shipPos['x_dir']))-projectileSize/2, 
+                'y':self.__ships[owner].getPos()['y']+shipSize*8/10*sin(radians(-shipPos['x_dir']))-projectileSize/2, 
+                'dir':-self.__ships[owner].getPos()['x_dir'],
             }
             maxDims = {
                 'x':self.__playingField.get_width()-self.__playingField.get_width()/8,

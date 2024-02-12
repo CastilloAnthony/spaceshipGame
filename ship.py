@@ -22,7 +22,7 @@ class Ship():
                 'Acceleration':0.0, 
                 'Max Cargo':10,
                 'Cargo':2,
-                'Fire Rate':3,
+                'Fire Rate':1,
                 'Firing Cooldown':0,
             }
         self.__pos = {
@@ -142,12 +142,12 @@ class Ship():
                 #         self.__pos['y_dir'] -= self.__stats['Rotation Speed']*timedelta
                 #     else:
                 #         self.__pos['y_dir'] += 360-self.__stats['Rotation Speed']*timedelta
-                elif i == 'a': # Rotate Counter-Clockwise
+                elif i == 'd': # Rotate Counter-Clockwise
                     if self.__pos['x_dir']-self.__stats['Rotation Speed']*timedelta >= 0:
                         self.__pos['x_dir'] -= self.__stats['Rotation Speed']*timedelta
                     else:
                         self.__pos['x_dir'] += 360-self.__stats['Rotation Speed']*timedelta
-                elif i == 'd': # Rotate Clockwise
+                elif i == 'a': # Rotate Clockwise
                     if self.__pos['x_dir']+self.__stats['Rotation Speed']*timedelta <= 360:
                         self.__pos['x_dir'] += self.__stats['Rotation Speed']*timedelta
                     else:
@@ -179,20 +179,20 @@ class Ship():
         if fabs(self.__stats['Speed']+self.__stats['Acceleration']) >= self.__stats['Max Speed']:
             if self.__stats['Acceleration'] > 0:
                 self.__stats['Speed'] = self.__stats['Max Speed']
-            else:
+            elif self.__stats['Acceleration'] < 0:
                 self.__stats['Speed'] = -self.__stats['Max Speed']
         elif fabs(self.__stats['Speed']+self.__stats['Acceleration']*timedelta) < self.__stats['Max Speed']:
             self.__stats['Speed'] += self.__stats['Acceleration']*timedelta
 
         # Speed
         if fabs(self.__stats['Speed']) > 0.0:
-            self.__pos['x'] += self.__stats['Speed']*cos(radians(self.__pos['x_dir']))*timedelta
+            self.__pos['x'] += self.__stats['Speed']*cos(radians(-self.__pos['x_dir']))*timedelta
             if self.__pos['x'] > self.__maxDims['x']-self.__maxDims['x']/16:
                 self.__pos['x'] = self.__maxDims['x']-self.__pos['x']#+self.__maxDims['x']/16
             elif self.__pos['x'] < 0+self.__maxDims['x']/16:
                 self.__pos['x'] = self.__maxDims['x']-self.__pos['x']#-self.__maxDims['x']/16
             
-            self.__pos['y'] += self.__stats['Speed']*sin(radians(self.__pos['x_dir']))*timedelta
+            self.__pos['y'] += self.__stats['Speed']*sin(radians(-self.__pos['x_dir']))*timedelta
             if self.__pos['y'] > self.__maxDims['y']-self.__maxDims['y']/9:
                 self.__pos['y'] = self.__maxDims['y']-self.__pos['y']#+self.__maxDims['y']/9
             elif self.__pos['y'] < 0+self.__maxDims['y']/9:
